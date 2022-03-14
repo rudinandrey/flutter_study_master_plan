@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:master_plan/models/data_layer.dart';
 import 'package:master_plan/plan_provider.dart';
 import 'package:master_plan/views/plan_screen.dart';
 
@@ -55,7 +54,7 @@ class _PlanCreatorScreenState extends State<PlanCreatorScreen> {
   }
 
   Widget _buildMasterPlans() {
-    final plans = PlanProvider.of(context);
+    final plans = PlanProvider.of(context).plans;
 
     if (plans.isEmpty) {
       return Column(
@@ -73,13 +72,23 @@ class _PlanCreatorScreenState extends State<PlanCreatorScreen> {
       itemCount: plans.length,
       itemBuilder: (context, index) {
         final plan = plans[index];
-        return ListTile(
-          title: Text(plan.name),
-          subtitle: Text(plan.completenessMessage),
-          onTap: () {
-            Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => PlanScreen(plan: plan)));
+        return Dismissible(
+          key: ValueKey(plan),
+          background: Container(color: Colors.red),
+          direction: DismissDirection.endToStart,
+          onDismissed: (_) {
+            final controller = PlanProvider.of(context);
+            controller.deletePlan(plan);
+            setState(() {});
           },
+          child: ListTile(
+            title: Text(plan.name),
+            subtitle: Text(plan.completenessMessage),
+            onTap: () {
+              Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => PlanScreen(plan: plan)));
+            },
+          ),
         );
       },
     );
@@ -91,8 +100,7 @@ class _PlanCreatorScreenState extends State<PlanCreatorScreen> {
       return;
     }
 
-    final plan = Plan()..name = text;
-    PlanProvider.of(context).add(plan);
+    PlanProvider.of(context).addNewPlan(text);
     textController.clear();
     FocusScope.of(context).requestFocus(FocusNode());
     setState(() {});

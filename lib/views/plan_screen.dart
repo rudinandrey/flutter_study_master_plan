@@ -71,27 +71,39 @@ class _PlanScreenState extends State<PlanScreen> {
   }
 
   Widget _buildTaskTile(Task task) {
-    return ListTile(
-      leading: Checkbox(
-        value: task.complete,
-        onChanged: (selected) {
-          setState(() {
-            task.complete = selected!;
-          });
-        },
+    return Dismissible(
+      key: ValueKey(task),
+      background: Container(
+        color: Colors.red,
       ),
-      title: TextFormField(
-        initialValue: task.description,
-        onFieldSubmitted: (text) {
-          setState(() {
-            task.description = text;
-          });
-        },
-        onChanged: (text) {
-          setState(() {
-            task.description = text;
-          });
-        },
+      direction: DismissDirection.endToStart,
+      onDismissed: (_) {
+        final controller = PlanProvider.of(context);
+        controller.deleteTask(plan, task);
+        setState(() {});
+      },
+      child: ListTile(
+        leading: Checkbox(
+          value: task.complete,
+          onChanged: (selected) {
+            setState(() {
+              task.complete = selected!;
+            });
+          },
+        ),
+        title: TextFormField(
+          initialValue: task.description,
+          onFieldSubmitted: (text) {
+            setState(() {
+              task.description = text;
+            });
+          },
+          onChanged: (text) {
+            setState(() {
+              task.description = text;
+            });
+          },
+        ),
       ),
     );
   }
